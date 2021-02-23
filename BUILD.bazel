@@ -1,0 +1,54 @@
+load(
+    "//ign_bazel:build_defs.bzl",
+    "IGNITION_FEATURES",
+    "IGNITION_ROOT",
+    "IGNITION_VISIBILITY",
+    "cmake_configure_file",
+    "generate_include_header",
+    "generate_yaml",
+)
+load(
+    "@bazelruby_rules_ruby//ruby:defs.bzl",
+    "ruby_binary",
+    "ruby_library",
+    "ruby_rspec",
+    "ruby_test",
+)
+
+CMAKE_INSTALL_PREFIX = "./ign_tools"
+
+# Generates config.hh based on the version numbers in CMake code.
+cmake_configure_file(
+    name = "config",
+    src = "src/ign.in",
+    out = "ign.rb",
+    cmakelists = ["CMakeLists.txt"],
+    defines = [
+        "CMAKE_INSTALL_PREFIX=%s" % CMAKE_INSTALL_PREFIX,
+    ],
+)
+
+ruby_binary(
+    name = "ign",
+    srcs = ["ign.rb"],
+    data = [
+        IGNITION_ROOT + "sdformat:sdf",
+        IGNITION_ROOT + "sdformat:libsdformat10.so",
+        IGNITION_ROOT + "ign_msgs:msgs",
+        IGNITION_ROOT + "ign_msgs:libignition-msgs.so",
+        IGNITION_ROOT + "ign_transport:transport",
+        IGNITION_ROOT + "ign_transport:libignition-transport.so",
+        IGNITION_ROOT + "ign_transport/log:log",
+        IGNITION_ROOT + "ign_transport/log:libignition-transport-log.so",
+        IGNITION_ROOT + "ign_transport/log:sql",
+        IGNITION_ROOT + "ign_fuel_tools:fuel",
+        IGNITION_ROOT + "ign_fuel_tools:libignition-fuel-tools.so",
+        IGNITION_ROOT + "ign_gazebo:gazebo",
+        IGNITION_ROOT + "ign_gazebo:ign_gazebo_systems",
+        IGNITION_ROOT + "ign_gazebo:libignition-gazebo.so",
+        IGNITION_ROOT + "ign_gui:gui",
+        IGNITION_ROOT + "ign_gui:libignition-gui.so",
+    ],
+    includes = ["."],
+    main = "ign.rb",
+)
